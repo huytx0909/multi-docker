@@ -1,0 +1,52 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+  redis:
+    image: 'redis:latest'
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - '3050:80'
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+      # specify context for Dockerfile
+      context: ./server
+    #s
+    volumes:
+      # leave this directory alone
+      - /app/node_modules
+      # copy to container using "colon" sign (reflect changes to container without rebuilding image)
+      - ./server:/app
+      # setting environment variable at RUNTIME (when container is fired up)
+      # syntax1: key = value
+      # syntax2: only key => taken from host computer
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+  client:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:
+        - /app/node_modules
+        - ./client:/app
+  worker:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes:
+        - /app/node_modules
+        - ./worker:/app
+    environment:
+        - REDIS_HOST=redis
+        - REDIS_PORT=6379

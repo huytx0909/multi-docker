@@ -1,0 +1,14 @@
+FROM node:alpine
+
+# all subsequent actions should be taken from this directory 
+WORKDIR '/app'
+
+# COPY copy files from host to image
+COPY ./package.json ./
+
+#RUN run comands when setting up image
+RUN npm install
+
+COPY . .
+
+CMD ["npm", "run", "start"]
